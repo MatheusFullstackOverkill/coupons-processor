@@ -1,0 +1,39 @@
+version: "3"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=doctorwho3210
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+  database:
+    container_name: database
+    image: postgres:12
+    environment:
+      POSTGRES_PASSWORD: doctorwho3210
+      POSTGRES_USER: postgres
+      POSTGRES_DB: coupons-processor
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  backend:
+    container_name: backend
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      FLASK_APP: main.py
+    depends_on:
+      - database
+    command: sh -c "flask migrate execute && flask --app main run --host=0.0.0.0 --port=8000"
+
+volumes:
+  rabbitmq_data:
+  pgdata: {}
