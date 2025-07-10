@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   rabbitmq:
-    container_name: rabbitmq
+    container_name: coupons_processor_rabbitmq
     image: rabbitmq:3
     environment:
       - RABBITMQ_DEFAULT_USER=guest
@@ -19,24 +19,22 @@ services:
       timeout: 10s
       retries: 5
   database:
-    container_name: database
+    container_name: coupons_processor_database
     image: postgres:12
     environment:
       POSTGRES_PASSWORD: doctorwho3210
       POSTGRES_USER: postgres
-      POSTGRES_DB: coupons-processor
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: coupons_processor
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d coupons-processor"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d coupons_processor"]
       start_period: 10s
       interval: 10s
       timeout: 10s
       retries: 5
   api:
-    container_name: api
+    container_name: coupons_processor_api
     build: .
     ports:
       - "8000:8000"
@@ -49,7 +47,7 @@ services:
         condition: service_healthy
     command: sh -c "flask migrate execute && flask --app main run --host=0.0.0.0 --port=8000"
   celery:
-    container_name: celery
+    container_name: coupons_processor_celery
     build: .
     environment:
       FLASK_APP: main.py
